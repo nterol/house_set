@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at          DateTime?        @default(now()) @db.Timestamptz(6)
+  name                String?
+  items_to_categories ItemOnCategory[]
+}
+
+model Item {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at          DateTime?        @default(now()) @db.Timestamptz(6)
+  name                String?          @db.VarChar
+  img_url             String?
+  description         String?
+  bought              Boolean?         @default(false)
+  store_link          String?
+  room_id             String?          @db.Uuid
+  rooms               Room?            @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  items_to_categories ItemOnCategory[]
+}
+
+model ItemOnCategory {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  item_id     String?   @db.Uuid
+  category_id String?   @db.Uuid
+  categories  Category? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  items       Item?     @relation(fields: [item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Room {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  name       String?
+  items      Item[]
+}
